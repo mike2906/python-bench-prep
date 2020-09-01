@@ -9,13 +9,6 @@ from random import sample
 from random import randint
 from collections import Counter 
 
-# Number the random numbers start from
-int_range_min = 1
-#Number the random numbers finsh at
-int_range_max = 9
-#How many random numbers there should be (must be smaller than int_range_max)
-int_range_size = 8
-
 
 def generate_numbers(int_range_min, int_range_max, int_range_size):
     """Returns a unique random list of numbers of size int_range_size between int_range_min and 
@@ -52,6 +45,13 @@ def get_missing_numbers(full_list, subset_list):
 def main(): 
     """Launcher."""
     try:
+        # Number the random numbers start from
+        int_range_min = 1
+        #Number the random numbers finsh at
+        int_range_max = 9
+        #How many random numbers there should be (must be smaller than int_range_max)
+        int_range_size = 8
+
         assert int_range_size < int_range_max, "Error: int_range_size too large. Must be smaller than int_range_max."
         generated_list = generate_numbers(int_range_min, int_range_max, int_range_size)
         subset_list = get_subset_of_list(generated_list)
