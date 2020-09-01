@@ -13,15 +13,17 @@ from collections import Counter
 int_range_min = 1
 #Number the random numbers finsh at
 int_range_max = 9
-#How many random numbers there should be
-int_range_size = 10
+#How many random numbers there should be (must be smaller than int_range_max)
+int_range_size = 8
 
 
 def generate_numbers(int_range_min, int_range_max, int_range_size):
-    """Returns a random list of numbers of size int_range_size between int_range_min and 
+    """Returns a unique random list of numbers of size int_range_size between int_range_min and 
     int_range_max
     """
-    return [random.randint(int_range_min, int_range_max) for iter in range(int_range_size)]
+    generated_list = random.sample(range(int_range_min,int_range_max),int_range_size)
+    return generated_list
+    #return [random.randint(int_range_min, int_range_max) for iter in range(int_range_size)]
 
 def get_subset_of_list(input_list):
     """Returns a random sized subset of the values in the list passed to it."""
@@ -40,7 +42,6 @@ def read_list_from_file():
      # Need to change from strings to ints (and only need first row of CSV)
      return list(map(int, next(reader)))
 
-
 def get_missing_numbers(full_list, subset_list):
     """Compares the two lists passed to it and returns the values of the second
     missing from the first
@@ -50,15 +51,20 @@ def get_missing_numbers(full_list, subset_list):
 # Main program
 def main(): 
     """Launcher."""
-    generated_list = generate_numbers(int_range_min, int_range_max, int_range_size)
-    subset_list = get_subset_of_list(generated_list)
-    write_list_to_file(subset_list)
-    list_from_file = read_list_from_file()
-    missing_numbers = get_missing_numbers(generated_list, list_from_file)
-    print("Full generated list: ", generated_list)
-    print("Random subset of list: ", subset_list)
-    print("List from file: ", list_from_file)
-    print("Missing numbers: ", missing_numbers)
+    try:
+        assert int_range_size < int_range_max, "Error: int_range_size too large. Must be smaller than int_range_max."
+        generated_list = generate_numbers(int_range_min, int_range_max, int_range_size)
+        subset_list = get_subset_of_list(generated_list)
+        write_list_to_file(subset_list)
+        list_from_file = read_list_from_file()
+        missing_numbers = get_missing_numbers(generated_list, list_from_file)
+        print("Full generated list: ", generated_list)
+        print("Random subset of list: ", subset_list)
+        print("List from file: ", list_from_file)
+        print("Missing numbers: ", missing_numbers)
+    except AssertionError as error:
+        print(error)
+
 
 if __name__ == "__main__": 
 	main() 
