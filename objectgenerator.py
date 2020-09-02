@@ -75,7 +75,9 @@ def main():
         people_from_json = load_people_from_json_file()
         print('People From File: ', people_from_json)
 
-        print ("Missing people: ", [obj for obj in people if obj not in people_from_json])
+        missing_people = [obj for obj in people if obj not in people_from_json]
+        print ("Missing people: ", missing_people)
+        
     except (FileNotFoundError):
         print("File:", potential_names_filename, "containing list of names has not been found.")
     except (ValueError):
