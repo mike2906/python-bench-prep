@@ -41,9 +41,7 @@ def get_missing_numbers(full_list, subset_list):
     """
     return list((Counter(full_list) - Counter(subset_list)).elements())
 
-# Main program
 def main(): 
-    """Launcher."""
     try:
         # Number the random numbers start from
         int_range_min = 1

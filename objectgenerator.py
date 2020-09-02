@@ -8,8 +8,6 @@ from random import sample
 import json 
 from collections import namedtuple
 
-
-
 class Person:
     def __init__(self, name, age):
         self.name = name
@@ -21,24 +19,22 @@ class Person:
     def __repr__(self):
         return f"{self.name} is {self.age} years old."
 
-
 def decode_person(ob):
     return Person(ob["name"], ob["age"])
 
-def generate_people( age_max, no_of_people):
+def generate_people( age_max, no_of_people, filename):
     """Reads a list of names from a file then selects a random number of them configured
     by no_of_people and assigns them ages up to age_max
     """
     try:
         people = []
-        filename = "PotentialNames.txt"
         with open(filename) as myfile:
             for line in myfile:
                 person = Person(line.rstrip('\n'),randint(1, age_max))
                 people.append(person)
         people = random.sample(people, no_of_people)
         return people
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         raise
 
 def create_people_subset(people, subset_size):
@@ -55,17 +51,20 @@ def load_people_from_json_file():
     with open("people_subset.json") as file:
         return json.load(file, object_hook=decode_person)
 
-
 def main(): 
-    """Launcher."""
     try:
+        #Max age to assign
         age_max = 99
+        #How many people to generate (<=200)
         no_of_people = 10
+        #How many people should be in subset
         subset_size = 2
+        #Filename of file which contains potential names to use to generate people
+        potential_names_filename = "PotentialNames.txt"
 
         assert subset_size < no_of_people, "Error: subset_size too large. Must be smaller than no_of_people."
 
-        people = generate_people(age_max,no_of_people)
+        people = generate_people(age_max,no_of_people, potential_names_filename)
         print('People: ', people)
 
         people_subset = create_people_subset(people,subset_size)
@@ -78,7 +77,9 @@ def main():
 
         print ("Missing people: ", [obj for obj in people if obj not in people_from_json])
     except (FileNotFoundError):
-        print("File containing list of names has not been found.")
+        print("File:", potential_names_filename, "containing list of names has not been found.")
+    except (ValueError):
+        print("no_of_people too large. Must be <= to the number of names in file:", potential_names_filename)
     except AssertionError as error:
         print(error)
         
