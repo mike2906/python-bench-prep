@@ -7,11 +7,17 @@ from random import randint
 from random import sample
 import json 
 from collections import namedtuple
+from typing import List
+
 
 class Person:
     def __init__(self, name, age):
         self.name = name
         self.age = age
+
+    @classmethod
+    def from_json(cls, data):
+        return cls(**data)
 
     def __eq__(self, other):
         return self.name == other.name and self.age == other.age
@@ -19,8 +25,20 @@ class Person:
     def __repr__(self):
         return f"{self.name} is {self.age} years old."
 
-def decode_person(ob):
-    return Person(ob["name"], ob["age"])
+class People(object):
+    def __init__(self, people: List[Person]):
+        self.people = people
+
+    @classmethod
+    def from_json(cls, data):
+        people = list(map(Person.from_json, data["people"]))
+        return cls(people)
+    
+    def __eq__(self, other):
+        return self.people == other.people
+
+#def decode_person(ob):
+#    return Person(ob["name"], ob["age"])
 
 def generate_people( age_max, no_of_people, filename):
     """Reads a list of names from a file then selects a random number of them configured
@@ -33,23 +51,27 @@ def generate_people( age_max, no_of_people, filename):
                 person = Person(line.rstrip('\n'),randint(1, age_max))
                 people.append(person)
         people = random.sample(people, no_of_people)
-        return people
+        return People(people)
     except (FileNotFoundError, ValueError):
         raise
 
 def create_people_subset(people, subset_size):
     """Selects a subset of subset_size from the provided list, people"""
-    return random.sample(people, subset_size)
+    return People(random.sample(people.people, subset_size))
 
-def write_people_to_json_file(people_list):
+
+
+def write_people_to_json_file(people):
     """Writes the provided list of people to a json file"""
     with open("people_subset.json", "w") as file:
-        json.dump([ob.__dict__ for ob in people_list], file, indent=4)
+        #json.dump([ob.__dict__ for ob in people_list], file, indent=4)
+        json.dump(people, file, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 def load_people_from_json_file():
     """Loads a list of people from a json file"""
     with open("people_subset.json") as file:
-        return json.load(file, object_hook=decode_person)
+        #return json.load(file, object_hook=decode_person)
+        return People.from_json(json.load(file))
 
 def main(): 
     try:
@@ -65,17 +87,17 @@ def main():
         assert subset_size < no_of_people, "Error: subset_size too large. Must be smaller than no_of_people."
 
         people = generate_people(age_max,no_of_people, potential_names_filename)
-        print('People: ', people)
+        print('People full list: ', people.people)
 
         people_subset = create_people_subset(people,subset_size)
-        print('Subset of people: ', people_subset)
+        print('Subset of people: ', people_subset.people)
 
         write_people_to_json_file(people_subset)
-        
-        people_from_json = load_people_from_json_file()
-        print('People From File: ', people_from_json)
 
-        missing_people = [obj for obj in people if obj not in people_from_json]
+        people_from_json = load_people_from_json_file()
+        print('People From File: ', people_from_json.people)
+
+        missing_people = [obj for obj in people.people if obj not in people_from_json.people]
         print ("Missing people: ", missing_people)
         
     except (FileNotFoundError):
