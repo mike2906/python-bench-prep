@@ -8,22 +8,11 @@ from random import sample
 import json 
 from collections import namedtuple
 from typing import List
+import person_file_writer
+from people import People, Person
 
 
-class Person:
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
 
-    @classmethod
-    def from_json(cls, data):
-        return cls(**data)
-
-    def __eq__(self, other):
-        return self.name == other.name and self.age == other.age
-
-    def __repr__(self):
-        return f"{self.name} is {self.age} years old."
 
 class People(object):
     def __init__(self, people: List[Person]):
@@ -61,11 +50,6 @@ def create_people_subset(people, subset_size):
 
 
 
-def write_people_to_json_file(people):
-    """Writes the provided list of people to a json file"""
-    with open("people_subset.json", "w") as file:
-        #json.dump([ob.__dict__ for ob in people_list], file, indent=4)
-        json.dump(people, file, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 def load_people_from_json_file():
     """Loads a list of people from a json file"""
@@ -92,7 +76,7 @@ def main():
         people_subset = create_people_subset(people,subset_size)
         print('Subset of people: ', people_subset.people)
 
-        write_people_to_json_file(people_subset)
+        person_file_writer.write_people_to_json_file(people_subset)
 
         people_from_json = load_people_from_json_file()
         print('People From File: ', people_from_json.people)
