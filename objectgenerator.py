@@ -12,23 +12,6 @@ import person_file_writer
 from people import People, Person
 
 
-
-
-class People(object):
-    def __init__(self, people: List[Person]):
-        self.people = people
-
-    @classmethod
-    def from_json(cls, data):
-        people = list(map(Person.from_json, data["people"]))
-        return cls(people)
-    
-    def __eq__(self, other):
-        return self.people == other.people
-
-#def decode_person(ob):
-#    return Person(ob["name"], ob["age"])
-
 def generate_people( age_max, no_of_people, filename):
     """Reads a list of names from a file then selects a random number of them configured
     by no_of_people and assigns them ages up to age_max
