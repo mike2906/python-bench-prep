@@ -134,3 +134,5 @@ vscode/
 
 # Generated files
 GENERATED_INTEGERS.csv
+test.py
+people_subset.json
