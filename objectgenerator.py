@@ -9,8 +9,26 @@ import json
 from collections import namedtuple
 from typing import List
 import person_file_writer
+import store_people_db
 from people import People, Person
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from session_maker import session_maker
 
+import base
+
+
+
+
+
+#function reads from json
+#utility class
+
+def load_people_db(session):
+    people = []
+    for person in session.query(Person):
+        people.append(person)
+    return People(people)
 
 def generate_people( age_max, no_of_people, filename):
     """Reads a list of names from a file then selects a random number of them configured
@@ -31,14 +49,36 @@ def create_people_subset(people, subset_size):
     """Selects a subset of subset_size from the provided list, people"""
     return People(random.sample(people.people, subset_size))
 
+def load_people_from_json_file(func):
+    def wrapper_load_people_from_json_file(original_people):
+        """Loads a list of people from a json file"""
+        if storage_method == "json":  
+            with open("people_subset.json") as file:
+                #return json.load(file, object_hook=decode_person)
+                people_from_json = People.from_json(json.load(file))
+            value = func(original_people, people_from_json)
+            return value
+    return wrapper_load_people_from_json_file
+"""
+def load_people_db(func):
+    def wrapper_load_people_db(original_people, session):
+        if storage_method == "sql":          
+            people = []
+            session = session_maker()
+            for person in session.query(Person):
+                people.append(person)
+            people_from_db = People(people)
+            print("people_from_db: ", people_from_db.__dict__)
+            value = func(original_people, people_from_db)
+            return value
+    return wrapper_load_people_db
+"""
+@load_people_from_json_file
+#@load_people_db
+def find_missing_people(original_people, stored_people):
+    return [obj for obj in original_people.people if obj not in stored_people.people]
 
 
-
-def load_people_from_json_file():
-    """Loads a list of people from a json file"""
-    with open("people_subset.json") as file:
-        #return json.load(file, object_hook=decode_person)
-        return People.from_json(json.load(file))
 
 def main(): 
     try:
@@ -50,6 +90,9 @@ def main():
         subset_size = 2
         #Filename of file which contains potential names to use to generate people
         potential_names_filename = "PotentialNames.txt"
+        #Which storage method to use
+        global storage_method 
+        storage_method = "sql"
 
         assert subset_size < no_of_people, "Error: subset_size too large. Must be smaller than no_of_people."
 
@@ -59,14 +102,23 @@ def main():
         people_subset = create_people_subset(people,subset_size)
         print('Subset of people: ', people_subset.people)
 
-        person_file_writer.write_people_to_json_file(people_subset)
 
-        people_from_json = load_people_from_json_file()
-        print('People From File: ', people_from_json.people)
+        #
+        #store_people_db.store_people_db(people_subset, session)
+        #people_from_json = load_people_db(session)
+        #print("people from json type: ", type(people_from_json))
+        if storage_method == "json":
+            person_file_writer.write_people_to_json_file(people_subset)
+            missing_people = find_missing_people(people)
+        elif storage_method == "sql":     
+            session = session_maker()       
+            store_people_db.store_people_db(people_subset, session)
+            people_from_json = load_people_db(session)
+            missing_people = [obj for obj in people.people if obj not in people_from_json.people]
 
-        missing_people = [obj for obj in people.people if obj not in people_from_json.people]
-        print ("Missing people: ", missing_people)
         
+        print ("Missing people: ", missing_people)
+             
     except (FileNotFoundError):
         print("File:", potential_names_filename, "containing list of names has not been found.")
     except (ValueError):
