@@ -82,6 +82,10 @@ def find_missing_people(original_people, stored_people):
 
 def main(): 
     try:
+        
+        #Which storage method to use (values: json, sql)
+        global storage_method 
+        storage_method = "json"
         #Max age to assign
         age_max = 99
         #How many people to generate (<=200)
@@ -90,9 +94,7 @@ def main():
         subset_size = 2
         #Filename of file which contains potential names to use to generate people
         potential_names_filename = "PotentialNames.txt"
-        #Which storage method to use
-        global storage_method 
-        storage_method = "sql"
+        
 
         assert subset_size < no_of_people, "Error: subset_size too large. Must be smaller than no_of_people."
 

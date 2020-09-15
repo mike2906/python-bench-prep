@@ -7,6 +7,6 @@ def write_people_to_json_file(people):
     with open("people_subset.json", "w") as file:
         #print("people dict: ", people.__dict__)
         #json.dump(people, file, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        json.dump(people.to_json(), file, cls=PeopleEncoder)
+        json.dump(people.to_json(), file, cls=PeopleEncoder, indent=4)
     return 'wrote to file'
 
